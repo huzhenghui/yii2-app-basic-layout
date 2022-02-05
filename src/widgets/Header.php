@@ -3,14 +3,28 @@
 namespace huzhenghui\yii2\app_basic\layout\widgets;
 
 use Yii;
-use yii\bootstrap4\Html;
 use yii\bootstrap4\Nav;
 use yii\bootstrap4\NavBar;
+use yii\bootstrap4\Widget;
 
-class Header extends \yii\bootstrap4\Widget
+use huzhenghui\yii2\app_basic\layout\Module;
+use huzhenghui\yii2\app_basic\layout\navbar\NavItemsInterface;
+
+class Header extends Widget
 {
     public function run()
     {
+        $items = array();
+        $basiclayout = Yii::$app->getModule('basiclayout');
+        if ($basiclayout instanceof Module) {
+            foreach ($basiclayout->getNavItemsCollection() as $navItems) {
+                if ($navItems instanceof NavItemsInterface) {
+                    foreach ($navItems->getNavItems() as $navItem) {
+                        $items[] = $navItem;
+                    }
+                }
+            }
+        }
 ?>
         <header>
             <?php
@@ -23,21 +37,7 @@ class Header extends \yii\bootstrap4\Widget
             ]);
             echo Nav::widget([
                 'options' => ['class' => 'navbar-nav'],
-                'items' => [
-                    ['label' => 'Home', 'url' => ['site/index']],
-                    ['label' => 'About', 'url' => ['site/about']],
-                    ['label' => 'Contact', 'url' => ['site/contact']],
-                    Yii::$app->user->isGuest ? (['label' => 'Login', 'url' => ['site/login']]
-                    ) : ('<li>'
-                        . Html::beginForm(['site/logout'], 'post', ['class' => 'form-inline'])
-                        . Html::submitButton(
-                            'Logout (' . Yii::$app->user->identity->username . ')',
-                            ['class' => 'btn btn-link logout']
-                        )
-                        . Html::endForm()
-                        . '</li>'
-                    )
-                ],
+                'items' => $items,
             ]);
             NavBar::end();
             ?>
